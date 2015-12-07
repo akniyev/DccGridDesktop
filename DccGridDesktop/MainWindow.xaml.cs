@@ -22,6 +22,29 @@ namespace DccGridDesktop
     {
         public string name;
         public string description;
+
+        public string Encode()
+        {
+            return name + "%#" + description;
+        }
+
+        public void loadFromString(string s)
+        {
+            var r = s.Split(new string[] { "%#" }, StringSplitOptions.None);
+            if (r.Length != 2) throw new Exception();
+
+            name = r[0];
+            description = r[1];
+        }
+
+        static public Club Decode(string s)
+        {
+            var c = new Club();
+
+            c.loadFromString(s);
+
+            return c;
+        }
     }
 
     public class Participant
@@ -76,6 +99,15 @@ namespace DccGridDesktop
             catch { }
         }
 
+        public static Participant Decode(string s)
+        {
+            var p = new Participant();
+
+            p.loadFromString(s);
+
+            return p;
+        }
+
         public Participant() { }
 
         public Participant(string l)
@@ -110,6 +142,13 @@ namespace DccGridDesktop
 
             }
         }
+
+        public static YearRange Decode(string s)
+        {
+            var y = new YearRange();
+            y.LoadFromString(s);
+            return y;
+        }
     }
 
     public class WeightRange
@@ -139,6 +178,13 @@ namespace DccGridDesktop
         public string Encode()
         {
             return name + ";" + minWeight + ";" + maxWeight;
+        }
+
+        public static WeightRange Decode(string s)
+        {
+            var w = new WeightRange();
+            w.LoadFromString(s);
+            return w;
         }
     }
 
@@ -302,35 +348,39 @@ namespace DccGridDesktop
             }
         }
 
+        string END_CLUBS = "#END_CLUBS#";
+        string END_WEIGHTS = "#END_WEIGHTS#";
+        string END_YEARS = "#END_YEARS#";
+        string NEXT = "#>>#";
+
         string infoToString()
         {
-            var result = "INFO\n";
+            var result = "INFO";
 
             foreach (var club in clubs)
             {
-                result += club.name + "\n" + club.description + "\n";
+                result += club.Encode() + NEXT;
             }
 
-            result += "######\n";
+            result += END_CLUBS;
 
             foreach (var year in years)
             {
-                result += year.startYear + "\n" + year.endYear + "\n";
+                result += year.Encode() + NEXT;
             }
 
-            result += "######\n";
+            result += END_YEARS;
 
             foreach (var weight in weights)
             {
-                result += weight.name + "\n" + weight.minWeight + "\n" + weight.maxWeight + "\n";
+                result += weight.Encode() + NEXT;
             }
 
-            result += "######\n";
+            result += END_WEIGHTS;
 
             foreach (var p in participants)
             {
-                result += p.name + "%" + p.surname + "%" + p.patronymic + "%" + p.weight + "%" + p.birthYear
-                    + "%" + p.clubName + "\n"; 
+                result += p.Encode() + NEXT; 
             }
 
             return result;
@@ -338,68 +388,92 @@ namespace DccGridDesktop
 
         void stringsToInfo (string r)
         {
-            var triple = r.Split(new string[] { "######\n" }, StringSplitOptions.None);
-            if (triple.Length != 4) throw new Exception();
+            if (!r.StartsWith("INFO")) return;
 
-            var r1 = triple[0].Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            var r2 = triple[1].Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            var r3 = triple[2].Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            var r4 = triple[3].Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            r = r.Substring("INFO".Length);
 
-            if (r1[0] != "INFO") throw new Exception();
-            r1.RemoveAt(0);
-            if (r1.Count % 2 != 0) throw new Exception();
-            if (r2.Count % 2 != 0) throw new Exception();
-            if (r3.Count % 3 != 0) throw new Exception();
+            var sections = r.Split(new string[] { END_CLUBS, END_YEARS, END_WEIGHTS }, StringSplitOptions.None);
 
             try
             {
-                clubs.Clear();
-                for (int i = 0; i < r1.Count; i += 2)
-                {
-                    //MessageBox.Show(r1[i] + " " + r1[i+1]);
-                    string clubName = r1[i];
-                    string clubDescription = r1[i + 1];
-                    addClub(clubName, clubDescription);
-                }
+                var clubs = sections[0].Split(new string[] { NEXT }, StringSplitOptions.RemoveEmptyEntries).Select(x => Club.Decode(x)).ToList();
+                var years = sections[1].Split(new string[] { NEXT }, StringSplitOptions.RemoveEmptyEntries).Select(x => YearRange.Decode(x)).ToList();
+                var weights = sections[2].Split(new string[] { NEXT }, StringSplitOptions.RemoveEmptyEntries).Select(x => WeightRange.Decode(x)).ToList();
+                var participants = sections[3].Split(new string[] { NEXT }, StringSplitOptions.RemoveEmptyEntries).Select(x => Participant.Decode(x)).ToList();
 
-                years.Clear();
-                for (int i = 0; i < r2.Count; i += 2)
-                {
-                    //MessageBox.Show(r2[i] + " " + r2[i + 1]);
-                    int startYear = int.Parse(r2[i]);
-                    int endYear = int.Parse(r2[i + 1]);
-                    addYearRange(startYear, endYear);
-                }
+                this.clubs = clubs;
+                this.years = years;
+                this.weights = weights;
+                this.participants = participants;
 
-                weights.Clear();
-                for (int i = 0; i < r3.Count; i += 3)
-                {
-                    //MessageBox.Show(r3[i] + " " + r3[i+1] + " " + r3[i+2]);
-                    string weightName = r3[i];
-                    double minWeight = double.Parse(r3[i + 1]);
-                    double maxWeight = double.Parse(r3[i + 2]);
-                    addWeight(weightName, minWeight, maxWeight);
-                }
-
-                participants.Clear();
-                for (int i = 0; i < r4.Count(); i++)
-                {
-                    var fields = r4[i].Split(new char[] { '%' }, StringSplitOptions.RemoveEmptyEntries);
-                    string name = fields[0];
-                    string surname = fields[1];
-                    string patronymic = fields[2];
-                    double weight = double.Parse(fields[3]);
-                    int year = int.Parse(fields[4]);
-                    string clubName = fields[5];
-
-                    addParticipants(name, surname, patronymic, year, weight, clubName);
-                }
-            }
-            catch
+                reloadGui();
+            } catch
             {
 
             }
+            //return;
+            //var triple = r.Split(new string[] { "######\n" }, StringSplitOptions.None);
+            //if (triple.Length != 4) throw new Exception();
+
+            //var r1 = triple[0].Split(new char[] { '\n' }, StringSplitOptions.None).ToList();
+            //var r2 = triple[1].Split(new char[] { '\n' }, StringSplitOptions.None).ToList();
+            //var r3 = triple[2].Split(new char[] { '\n' }, StringSplitOptions.None).ToList();
+            //var r4 = triple[3].Split(new char[] { '\n' }, StringSplitOptions.None).ToList();
+
+            //if (r1[0] != "INFO") throw new Exception();
+            //r1.RemoveAt(0);
+            //if (r1.Count % 2 != 0) throw new Exception();
+            //if (r2.Count % 2 != 0) throw new Exception();
+            //if (r3.Count % 3 != 0) throw new Exception();
+
+            //try
+            //{
+            //    clubs.Clear();
+            //    for (int i = 0; i < r1.Count; i += 2)
+            //    {
+            //        //MessageBox.Show(r1[i] + " " + r1[i+1]);
+            //        string clubName = r1[i];
+            //        string clubDescription = r1[i + 1];
+            //        addClub(clubName, clubDescription);
+            //    }
+
+            //    years.Clear();
+            //    for (int i = 0; i < r2.Count; i += 2)
+            //    {
+            //        //MessageBox.Show(r2[i] + " " + r2[i + 1]);
+            //        int startYear = int.Parse(r2[i]);
+            //        int endYear = int.Parse(r2[i + 1]);
+            //        addYearRange(startYear, endYear);
+            //    }
+
+            //    weights.Clear();
+            //    for (int i = 0; i < r3.Count; i += 3)
+            //    {
+            //        //MessageBox.Show(r3[i] + " " + r3[i+1] + " " + r3[i+2]);
+            //        string weightName = r3[i];
+            //        double minWeight = double.Parse(r3[i + 1]);
+            //        double maxWeight = double.Parse(r3[i + 2]);
+            //        addWeight(weightName, minWeight, maxWeight);
+            //    }
+
+            //    participants.Clear();
+            //    for (int i = 0; i < r4.Count(); i++)
+            //    {
+            //        var fields = r4[i].Split(new char[] { '%' }, StringSplitOptions.RemoveEmptyEntries);
+            //        string name = fields[0];
+            //        string surname = fields[1];
+            //        string patronymic = fields[2];
+            //        double weight = double.Parse(fields[3]);
+            //        int year = int.Parse(fields[4]);
+            //        string clubName = fields[5];
+
+            //        addParticipants(name, surname, patronymic, year, weight, clubName);
+            //    }
+            //}
+            //catch
+            //{
+
+            //}
         }
 
         private void btnLoadFromFile_Click(object sender, RoutedEventArgs e)
