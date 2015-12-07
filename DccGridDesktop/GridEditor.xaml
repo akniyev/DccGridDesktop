@@ -1,0 +1,23 @@
+﻿<Window x:Class="DccGridDesktop.GridEditor"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DccGridDesktop"
+        mc:Ignorable="d"
+        Title="GridEditor" Height="671.333" Width="911" Loaded="Window_Loaded">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <ListBox x:Name="groupListBox" HorizontalAlignment="Left" Height="548" Margin="10,10,0,0" VerticalAlignment="Top" Width="321" SelectionChanged="groupListBox_SelectionChanged"/>
+        <ListBox x:Name="roundsListBox" HorizontalAlignment="Left" Height="548" Margin="336,10,0,0" VerticalAlignment="Top" Width="73" SelectionChanged="roundsListBox_SelectionChanged"/>
+        <ScrollViewer x:Name="scrollView" HorizontalAlignment="Left" Height="548" Margin="414,10,0,0" VerticalAlignment="Top" Width="479" RenderTransformOrigin="0.487,0.535"/>
+        <Button x:Name="btnNextRound" Content="Следующий раунд" HorizontalAlignment="Left" Margin="414,563,0,0" VerticalAlignment="Top" Width="167" Click="btnNextRound_Click"/>
+        <Button x:Name="btnOrder" Content="Изменить порядок" HorizontalAlignment="Left" Margin="586,563,0,0" VerticalAlignment="Top" Width="167" Click="btnOrder_Click"/>
+        <Button x:Name="btnExport" Content="Excel" HorizontalAlignment="Left" Margin="758,563,0,0" VerticalAlignment="Top" Width="135" Click="btnExport_Click"/>
+        <Button x:Name="btnSave" Content="Сохранить" HorizontalAlignment="Left" Margin="10,563,0,0" VerticalAlignment="Top" Width="135" Click="btnSave_Click"/>
+        <Button x:Name="btnLoad" Content="Загрузить" HorizontalAlignment="Left" Margin="150,563,0,0" VerticalAlignment="Top" Width="135" Click="btnLoad_Click"/>
+
+    </Grid>
+</Window>

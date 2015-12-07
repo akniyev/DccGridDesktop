@@ -1,0 +1,34 @@
+﻿<Window x:Class="DccGridDesktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DccGridDesktop"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="522.603" Width="899.038">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button x:Name="btnSaveToFile" Content="Сохранить" HorizontalAlignment="Right" Margin="0,0,10.333,10.333" VerticalAlignment="Bottom" Width="91" Click="btnSaveToFile_Click"/>
+        <Label x:Name="label" Content="Клубы" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="clubListBox" HorizontalAlignment="Left" Height="368" Margin="10,41,0,0" VerticalAlignment="Top" Width="214"/>
+        <Button x:Name="btnAddClub" Content="Добавить..." HorizontalAlignment="Left" Margin="10,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnAddClub_Click"/>
+        <Button x:Name="btnRemoveClub" Content="Удалить" HorizontalAlignment="Left" Margin="102,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnRemoveClub_Click"/>
+        <Label x:Name="label_Copy" Content="Веса" HorizontalAlignment="Left" Margin="229,10,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="weightListBox" HorizontalAlignment="Left" Height="368" Margin="229,41,0,0" VerticalAlignment="Top" Width="214"/>
+        <Button x:Name="btnAddWeight" Content="Добавить..." HorizontalAlignment="Left" Margin="229,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnAddWeight_Click"/>
+        <Button x:Name="btnRemoveWeight" Content="Удалить" HorizontalAlignment="Left" Margin="321,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnRemoveWeight_Click"/>
+        <Label x:Name="label_Copy1" Content="Года" HorizontalAlignment="Left" Margin="448,14,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="yearListBox" HorizontalAlignment="Left" Height="368" Margin="448,41,0,0" VerticalAlignment="Top" Width="214"/>
+        <Button x:Name="btnAddYear" Content="Добавить..." HorizontalAlignment="Left" Margin="448,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnAddYear_Click"/>
+        <Button x:Name="btnRemoveYear" Content="Удалить" HorizontalAlignment="Left" Margin="540,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnRemoveYear_Click"/>
+        <Button x:Name="btnLoadFromFile" Content="Загрузить" HorizontalAlignment="Right" Margin="0,0,106.333,10.333" VerticalAlignment="Bottom" Width="91" Click="btnLoadFromFile_Click"/>
+        <Button x:Name="btnGridEditor" Content="Редактор сеток" HorizontalAlignment="Right" Margin="0,0,482.333,10.333" VerticalAlignment="Bottom" Width="179" Click="btnGridEditor_Click"/>
+        <Label x:Name="label_Copy2" Content="Участники" HorizontalAlignment="Left" Margin="670,14,0,0" VerticalAlignment="Top"/>
+        <ListBox x:Name="participantsListBox" HorizontalAlignment="Left" Height="368" Margin="670,41,0,0" VerticalAlignment="Top" Width="214"/>
+        <Button x:Name="btnAddParticipant" Content="Добавить..." HorizontalAlignment="Left" Margin="670,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnAddParticipant_Click"/>
+        <Button x:Name="btnRemoveParticipant" Content="Удалить" HorizontalAlignment="Left" Margin="762,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnRemoveParticipant_Click"/>
+
+    </Grid>
+</Window>
