@@ -47,6 +47,8 @@ namespace DccGridDesktop
         }
     }
 
+    public enum ParticipantStatus { None, Win, Transfer }
+
     public class Participant
     {
         public string name;
@@ -55,6 +57,7 @@ namespace DccGridDesktop
         public int birthYear;
         public double weight;
         public string clubName;
+        public ParticipantStatus status = ParticipantStatus.None;
 
         public bool isInWeightRange(WeightRange wr)
         {
@@ -69,12 +72,18 @@ namespace DccGridDesktop
 
         public override string ToString()
         {
-            return String.Format("{0} {1} {2}, {3}кг, {4}г ({5})", name, surname, patronymic, weight, birthYear, clubName);
+            string statusStr = "";
+            if (status == ParticipantStatus.Win)
+                statusStr = "+";
+            else if (status == ParticipantStatus.Transfer)
+                statusStr = "->";
+            return String.Format("{0} {1} {2}, {3}кг, {4}г ({5})" + statusStr, 
+                name, surname, patronymic, weight, birthYear, clubName);
         }
 
         public string Encode()
         {
-            return String.Format("{0};{1};{2};{3};{4};{5}", name, surname, patronymic, weight, birthYear, clubName);
+            return String.Format("{0};{1};{2};{3};{4};{5};{6}", name, surname, patronymic, weight, birthYear, clubName,status);
         }
 
         public void loadFromString(string s)
@@ -89,12 +98,23 @@ namespace DccGridDesktop
                 var nyear = int.Parse(rs[4]);
                 var nclubname = rs[5];
 
+                ParticipantStatus nstatus;
+                if (rs.Length > 6)
+                {
+                    nstatus = (ParticipantStatus)Enum.Parse(typeof(ParticipantStatus), rs[6]);
+                }
+                else
+                {
+                    nstatus = ParticipantStatus.None;
+                }
+
                 name = nname;
                 surname = nsurname;
                 patronymic = npatronymic;
                 weight = nweight;
                 birthYear = nyear;
                 clubName = nclubname;
+                status = nstatus;
             }
             catch { }
         }
@@ -113,6 +133,20 @@ namespace DccGridDesktop
         public Participant(string l)
         {
             loadFromString(l);
+        }
+
+        public Participant getCopy()
+        {
+            var c = new Participant();
+            c.name = this.name;
+            c.surname = this.surname;
+            c.patronymic = this.patronymic;
+            c.birthYear = this.birthYear;
+            c.clubName = this.clubName;
+            c.weight = this.weight;
+            c.status = this.status;
+
+            return c;
         }
     }
 

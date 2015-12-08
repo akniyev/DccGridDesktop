@@ -70,6 +70,7 @@ namespace DccGridDesktop
         List<Participant> currentRound;
         int currentRoundId;
         List<RadioButton> currentRadioButtons;
+        List<RadioButton> currentCheckBoxes;
 
         string GRIDS = "GRIDS\n";
         string END_WEIGHT = "\n#END_WEIGHT#\n";
@@ -136,6 +137,8 @@ namespace DccGridDesktop
         void loadGrid()
         {
             currentRadioButtons = new List<RadioButton>();
+            currentCheckBoxes = new List<RadioButton>();
+
             var content = new StackPanel();
             int k = 1;
             for (int i = 0; i < currentRound.Count; i++)
@@ -151,13 +154,16 @@ namespace DccGridDesktop
                     k = -k + 1;
                 }
                 var rb = new RadioButton() { Content = currentRound[i].ToString(), IsChecked = false, GroupName = grId.ToString()};
+                
 
                 currentRadioButtons.Add(rb);
-
                 content.Children.Add(rb);
 
-                if (k > 0)
+                if (k > 0 || i == currentRound.Count - 1)
                 {
+                    var cb = new RadioButton() { Content = "Перекинуть", IsChecked = false, GroupName = grId.ToString() };
+                    currentCheckBoxes.Add(cb);
+                    content.Children.Add(cb);
                     var s = new Separator();
                     s.Height = 10;
                     content.Children.Add(s);
@@ -227,13 +233,10 @@ namespace DccGridDesktop
                 MessageBoxResult result = MessageBox.Show("Вы действительно хотите переписать раунды?", "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.No) return;
             }
-            
-            if (currentRoundId < currentGrid.roundParticipants.Count - 1)
-            {
-                currentGrid.roundParticipants.RemoveRange(currentRoundId + 1, currentGrid.roundParticipants.Count - currentRoundId - 1);
-            }
 
             int checkedCount = 0;
+            int transferredCount = 0;
+            int totalCount = currentRound.Count / 2 + currentRound.Count % 2;
             for (int i = 0; i < currentRadioButtons.Count; i++)
             {
                 if (currentRadioButtons[i].IsChecked != null && currentRadioButtons[i].IsChecked == true)
@@ -241,9 +244,17 @@ namespace DccGridDesktop
                     checkedCount++;
                 }
             }
-            if (checkedCount != currentRound.Count / 2 + currentRound.Count % 2)
+            for (int i = 0; i < currentCheckBoxes.Count; i++)
+            {
+                if (currentCheckBoxes[i].IsChecked == true) transferredCount++;
+            }
+            if (checkedCount + transferredCount != totalCount)
             {
                 MessageBox.Show("Необходимо выбрать всех участников!");
+                return;
+            } else if (checkedCount == 0)
+            {
+                MessageBox.Show("Всех переносить нельзя!");
                 return;
             }
 
@@ -252,9 +263,30 @@ namespace DccGridDesktop
             {
                 if (currentRadioButtons[i].IsChecked != null && currentRadioButtons[i].IsChecked == true)
                 {
-                    nRound.Add(currentRound[i]);
+                    var p = currentRound[i].getCopy();
+                    p.status = ParticipantStatus.None;
+                    nRound.Add(p);
+
+                    currentRound[i].status = ParticipantStatus.Win;
+                }
+                else if (currentCheckBoxes[i/2].IsChecked == true)
+                {
+                    var p = currentRound[i].getCopy();
+                    p.status = ParticipantStatus.None;
+                    nRound.Add(p);
+                    currentRound[i].status = ParticipantStatus.Transfer;
+                }
+                else
+                {
+                    currentRound[i].status = ParticipantStatus.None;
                 }
             }
+
+            if (currentRoundId < currentGrid.roundParticipants.Count - 1)
+            {
+                currentGrid.roundParticipants.RemoveRange(currentRoundId + 1, currentGrid.roundParticipants.Count - currentRoundId - 1);
+            }
+
             currentGrid.roundParticipants.Add(nRound);
 
             reloadGui();
@@ -430,6 +462,8 @@ namespace DccGridDesktop
                 var rng = sh.UsedRange;
                 rng.Style.VerticalAlignment = Excel.XlHAlign.xlHAlignCenter;
 
+                
+
                 int counter = 1;
                 for (int col = 0; col < g.roundParticipants.Count; col++)
                 {
@@ -440,14 +474,16 @@ namespace DccGridDesktop
                         var p = g.roundParticipants[col][row];
                         sh.Cells[yCoord(col, row), xCoord(col) + 2] = p.surname + " " + p.name[0] + "." + p.patronymic[0] + ".";
 
-                        if (col < g.roundParticipants.Count - 1)
-                        {
-                            var tmp = g.roundParticipants[col + 1].ToList();
-                            if (tmp.Where(x => x.ToString() == p.ToString()).Count() > 0)
-                            {
-                                sh.Cells[yCoord(col, row), xCoord(col) + 7] = "+";
-                            }
-                        }
+                        if (p.status == ParticipantStatus.Win)
+                            sh.Cells[yCoord(col, row), xCoord(col) + 7] = "+";
+                        //if (col < g.roundParticipants.Count - 1)
+                        //{
+                        //    //var tmp = g.roundParticipants[col + 1].ToList();
+                        //    if (tmp.Where(x => x.ToString() == p.ToString()).Count() > 0)
+                        //    {
+                        //        sh.Cells[yCoord(col, row), xCoord(col) + 7] = "+";
+                        //    }
+                        //}
 
                         if (row % 2 == 0)
                         {
