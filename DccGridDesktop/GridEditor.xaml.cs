@@ -462,64 +462,80 @@ namespace DccGridDesktop
                 var rng = sh.UsedRange;
                 rng.Style.VerticalAlignment = Excel.XlHAlign.xlHAlignCenter;
 
-                
+                int treeBaseWidth = 1;
 
+                for (int i = 0; i < g.roundParticipants.Count; i++)
+                {
+                    while (treeBaseWidth / Math.Pow(2, i) < g.roundParticipants[i].Count)
+                        treeBaseWidth *= 2;
+                }
+
+                //Здесь ячейки только рисуются
+                for (int col = 0; treeBaseWidth / Math.Pow(2, col) > 1; col++)
+                {
+                    for (int row = 0; row < treeBaseWidth / Math.Pow(2, col); row++)
+                    {
+                        if (row % 2 == 0)
+                        {
+                            bool down = (row / 2) % 2 == 0;
+
+                            if (treeBaseWidth / Math.Pow(2, col) > 2)
+                                if (down)
+                                {
+                                    var b3 = sh.Range[sh.Cells[yCoord(col, row) + 1, xCoord(col) + 8], sh.Cells[yCoord(col + 1, row / 2), xCoord(col) + 8]].Borders();
+                                    CustomBorders(b3, false, true, false, false);
+
+                                    var b1 = sh.Range[sh.Cells[yCoord(col, row) + 1, xCoord(col) + 8], sh.Cells[yCoord(col, row) + 1, xCoord(col) + 8]].Borders();
+                                    CustomBorders(b1, false, true, true, false);
+                                    var b2 = sh.Range[sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1], sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1]].Borders();
+                                    CustomBorders(b2, true, false, false, true);
+                                }
+                                else
+                                {
+                                    var b3 = sh.Range[sh.Cells[yCoord(col, row), xCoord(col) + 8], sh.Cells[yCoord(col + 1, row / 2), xCoord(col) + 8]].Borders();
+                                    CustomBorders(b3, false, true, false, false);
+
+                                    var b1 = sh.Range[sh.Cells[yCoord(col, row), xCoord(col) + 8], sh.Cells[yCoord(col, row), xCoord(col) + 8]].Borders();
+                                    CustomBorders(b1, false, true, false, true);
+                                    var b2 = sh.Range[sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1], sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1]].Borders();
+                                    CustomBorders(b2, true, false, true, false);
+                                }
+
+                            sh.Range[sh.Cells[yCoord(col, row), xCoord(col)], sh.Cells[yCoord(col, row) + 1, xCoord(col)]].Merge();
+                            sh.Range[sh.Cells[yCoord(col, row), xCoord(col) + 2], sh.Cells[yCoord(col, row), xCoord(col) + 6]].Merge();
+                            sh.Range[sh.Cells[yCoord(col, row + 1), xCoord(col) + 2], sh.Cells[yCoord(col, row + 1), xCoord(col) + 6]].Merge();
+
+                            AllBorders(
+                            sh.Range[sh.Cells[yCoord(col, row), xCoord(col)], sh.Cells[yCoord(col, row) + 1, xCoord(col) + 7]].Borders()
+                            );
+                        }
+                    }
+                }
+
+                //Здесь ячейки заполняются
                 int counter = 1;
                 for (int col = 0; col < g.roundParticipants.Count; col++)
                 {
-                    for (int row = 0; row < g.roundParticipants[col].Count; row++)
-                    {
-                        if (g.roundParticipants[col].Count <= 1) continue;
+                    var roundParticipants = g.roundParticipants[col].Where(x => x.status != ParticipantStatus.Transfer).ToList();
 
-                        var p = g.roundParticipants[col][row];
+                    for (int row = 0; row < roundParticipants.Count; row++)
+                    {
+                        if (roundParticipants.Count <= 1) continue;
+
+                        var p = roundParticipants[row];
                         sh.Cells[yCoord(col, row), xCoord(col) + 2] = p.surname + " " + p.name[0] + "." + p.patronymic[0] + ".";
 
                         if (p.status == ParticipantStatus.Win)
                             sh.Cells[yCoord(col, row), xCoord(col) + 7] = "+";
-                        //if (col < g.roundParticipants.Count - 1)
-                        //{
-                        //    //var tmp = g.roundParticipants[col + 1].ToList();
-                        //    if (tmp.Where(x => x.ToString() == p.ToString()).Count() > 0)
-                        //    {
-                        //        sh.Cells[yCoord(col, row), xCoord(col) + 7] = "+";
-                        //    }
-                        //}
+
+                        if (p.status == ParticipantStatus.Transfer)
+                            sh.Cells[yCoord(col, row), xCoord(col) + 7] = ">>";
 
                         if (row % 2 == 0)
                         {
                             bool down = (row / 2) % 2 == 0;
 
-                            if (col < g.roundParticipants.Count - 1 && !(g.roundParticipants[col+1].Count <= 1))
-                            if (down)
-                            {
-                                var b3 = sh.Range[sh.Cells[yCoord(col, row) + 1, xCoord(col) + 8], sh.Cells[yCoord(col + 1, row / 2), xCoord(col) + 8]].Borders();
-                                CustomBorders(b3, false, true, false, false);
-
-                                var b1 = sh.Range[sh.Cells[yCoord(col, row) + 1, xCoord(col) + 8], sh.Cells[yCoord(col, row) + 1, xCoord(col) + 8]].Borders();
-                                CustomBorders(b1, false, true, true, false);
-                                var b2 = sh.Range[sh.Cells[yCoord(col+1, row/2), xCoord(col+1)-1], sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1]].Borders();
-                                CustomBorders(b2, true, false, false, true);
-                            } else
-                            {
-                                var b3 = sh.Range[sh.Cells[yCoord(col, row), xCoord(col) + 8], sh.Cells[yCoord(col + 1, row / 2), xCoord(col) + 8]].Borders();
-                                CustomBorders(b3, false, true, false, false);
-
-                                var b1 = sh.Range[sh.Cells[yCoord(col, row), xCoord(col) + 8], sh.Cells[yCoord(col, row), xCoord(col) + 8]].Borders();
-                                CustomBorders(b1, false, true, false, true);
-                                var b2 = sh.Range[sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1], sh.Cells[yCoord(col + 1, row / 2), xCoord(col + 1) - 1]].Borders();
-                                CustomBorders(b2, true, false, true, false);
-                            }
-
-                            sh.Range[sh.Cells[yCoord(col, row), xCoord(col)], sh.Cells[yCoord(col, row)+1, xCoord(col)]].Merge();
-                            sh.Range[sh.Cells[yCoord(col, row), xCoord(col) + 2], sh.Cells[yCoord(col, row), xCoord(col) + 6]].Merge();
-                            sh.Range[sh.Cells[yCoord(col, row+1), xCoord(col) + 2], sh.Cells[yCoord(col, row+1), xCoord(col) + 6]].Merge();
-
-                            AllBorders(
-                            sh.Range[sh.Cells[yCoord(col, row), xCoord(col)], sh.Cells[yCoord(col, row) + 1, xCoord(col)+7]].Borders()
-                            );
-
                             sh.Cells[yCoord(col, row), xCoord(col)] = counter.ToString();
-                            //sh.Range[sh.Cells[yCoord(col, row), xCoord(col)]].Style.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
                             counter++;
                         }
                     }

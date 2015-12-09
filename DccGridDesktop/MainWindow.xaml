@@ -29,7 +29,7 @@
         <ListBox x:Name="participantsListBox" HorizontalAlignment="Left" Height="368" Margin="670,41,0,0" VerticalAlignment="Top" Width="214"/>
         <Button x:Name="btnAddParticipant" Content="Добавить..." HorizontalAlignment="Left" Margin="670,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnAddParticipant_Click"/>
         <Button x:Name="btnRemoveParticipant" Content="Удалить" HorizontalAlignment="Left" Margin="762,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnRemoveParticipant_Click"/>
-        <Label x:Name="label1" Content="Версия 0.2" HorizontalAlignment="Left" Margin="815,10,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="label1" Content="Версия 0.3.1" HorizontalAlignment="Left" Margin="807,10,0,0" VerticalAlignment="Top"/>
 
     </Grid>
 </Window>
