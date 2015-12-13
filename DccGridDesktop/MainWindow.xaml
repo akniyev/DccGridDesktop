@@ -30,6 +30,7 @@
         <Button x:Name="btnAddParticipant" Content="Добавить..." HorizontalAlignment="Left" Margin="670,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnAddParticipant_Click"/>
         <Button x:Name="btnRemoveParticipant" Content="Удалить" HorizontalAlignment="Left" Margin="762,0,0,49.333" VerticalAlignment="Bottom" Width="87" Click="btnRemoveParticipant_Click"/>
         <Label x:Name="label1" Content="Версия 0.3.1" HorizontalAlignment="Left" Margin="807,10,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnGridEditor_Copy" Content="Редактор сеток 2" HorizontalAlignment="Right" Margin="0,0,298.667,10.333" VerticalAlignment="Bottom" Width="179" Click="btnGridEditor_Click"/>
 
     </Grid>
 </Window>

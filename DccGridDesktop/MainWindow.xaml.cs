@@ -59,6 +59,21 @@ namespace DccGridDesktop
         public string clubName;
         public ParticipantStatus status = ParticipantStatus.None;
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Participant)) return false;
+
+            var o = obj as Participant;
+
+            return this.name == o.name && this.surname == o.surname && this.patronymic == o.patronymic && this.birthYear == o.birthYear
+                && this.weight == o.weight && this.clubName == o.clubName && this.status == o.status;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         public bool isInWeightRange(WeightRange wr)
         {
             return weight > wr.minWeight && weight <= wr.maxWeight;
@@ -574,13 +589,13 @@ namespace DccGridDesktop
 
         private void btnGridEditor_Click(object sender, RoutedEventArgs e)
         {
-            var gridEditorWindow = new GridEditor();
+            var gridEditor2Window = new GridEditor2.GridEditor2();
 
-            gridEditorWindow.weights = weights;
-            gridEditorWindow.years = years;
-            gridEditorWindow.participants = participants;
+            //gridEditorWindow.weights = weights;
+            //gridEditorWindow.years = years;
+            gridEditor2Window.SetInfo(participants, weights, years);
 
-            gridEditorWindow.Show();
+            gridEditor2Window.Show();
         }
 
         private void btnRemoveParticipant_Click(object sender, RoutedEventArgs e)
