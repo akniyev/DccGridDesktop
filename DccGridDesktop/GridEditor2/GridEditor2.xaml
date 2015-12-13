@@ -30,9 +30,9 @@
         </ScrollViewer>
         <Button x:Name="btnNext" Content="Следующий раунд" Grid.Column="2" HorizontalAlignment="Left" Margin="132,8,0,0" VerticalAlignment="Top" Width="121" Height="28" Click="btnNext_Click" IsEnabled="False"/>
         <Label x:Name="lblStatus" Content="Выберите группу" Grid.Column="2" HorizontalAlignment="Left" Margin="258,9,0,0" VerticalAlignment="Top" Width="170"/>
-        <Button x:Name="btnExcel" Content="Excel..." Grid.Column="2" Margin="679,8,10,0" VerticalAlignment="Top" Height="30"/>
-        <Button x:Name="btnSave" Content="Сохранить..." Grid.Column="2" Margin="428,8,261,0" VerticalAlignment="Top" Height="30"/>
-        <Button x:Name="btnLoad" Content="Открыть..." Grid.Column="2" Margin="540,8,149,0" VerticalAlignment="Top" Height="30"/>
+        <Button x:Name="btnExcel" Content="Excel..." Grid.Column="2" Margin="0,8,10,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="107"/>
+        <Button x:Name="btnSave" Content="Сохранить..." Grid.Column="2" Margin="0,8,261,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="107"/>
+        <Button x:Name="btnLoad" Content="Открыть..." Grid.Column="2" Margin="0,8,149,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="107"/>
 
     </Grid>
 </Window>

@@ -337,9 +337,15 @@ namespace DccGridDesktop.GridEditor2
             {
                 var id = int.Parse(textId);
                 var p = _currentGroup.participants[id].getCopy();
-                
+
+                var old_p = _currentGroup.BaseDistribution[col][row];
                 _currentGroup.BaseDistribution[col][row] = p;
                 _currentGroup.participants.RemoveAt(id);
+
+                if (old_p != null)
+                {
+                    _currentGroup.participants.Add(old_p);
+                }
             }
             else
             {
@@ -347,7 +353,8 @@ namespace DccGridDesktop.GridEditor2
                 var scol = s[0];
                 var srow = s[1];
 
-                var p = _currentGroup.BaseDistribution[scol][srow].getCopy();
+                var p = _currentGroup.BaseDistribution[scol][srow];
+                if (p != null) p = p.getCopy();
                 _currentGroup.BaseDistribution[scol][srow] = _currentGroup.BaseDistribution[col][row];
                 _currentGroup.BaseDistribution[col][row] = p;
             }
@@ -360,8 +367,9 @@ namespace DccGridDesktop.GridEditor2
         {
             var label = sender as MyLabel;
             var p = _currentGroup.BaseDistribution[label.col][label.row];
-            
-            DragDrop.DoDragDrop(label, String.Format("l{0};{1}", label.col, label.row), DragDropEffects.Move);
+
+            if (_currentGroup.BaseDistribution[label.col, label.row] != null)            
+                DragDrop.DoDragDrop(label, String.Format("l{0};{1}", label.col, label.row), DragDropEffects.Move);
         }
 
         public GridEditor2()
