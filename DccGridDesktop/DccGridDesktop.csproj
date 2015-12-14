@@ -41,6 +41,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -62,6 +63,14 @@
     <Compile Include="GridEditor2\GridEditor2.xaml.cs">
       <DependentUpon>GridEditor2.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\Club.cs" />
+    <Compile Include="Models\ExcelWriter.cs" />
+    <Compile Include="Models\Heap.cs" />
+    <Compile Include="Models\MyLabel.cs" />
+    <Compile Include="Models\Participant.cs" />
+    <Compile Include="Models\ParticipantGroup.cs" />
+    <Compile Include="Models\WeightRange.cs" />
+    <Compile Include="Models\YearRange.cs" />
     <Compile Include="RoundOrder.xaml.cs">
       <DependentUpon>RoundOrder.xaml</DependentUpon>
     </Compile>

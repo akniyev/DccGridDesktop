@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -11,207 +12,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using DccGridDesktop.Models;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace DccGridDesktop.GridEditor2
 {
-    class Heap<T>
-    {
-        T[][] heap;
-        public Heap (int minWidth)
-        {
-            if (minWidth < 1)
-            {
-                return;
-            }
-            int power = (int)Math.Ceiling(Math.Log(minWidth) / Math.Log(2));
-            int N = (int)Math.Pow(2, power);
-
-            heap = new T[power][];
-
-            int n = N;
-            for (int i = 0; i < power; i++)
-            {
-                heap[i] = new T[n];
-                n /= 2;
-            }
-        }
-
-        public Heap<T> Copy()
-        {
-            var result = new Heap<T>(heap.Length > 0 ? heap[0].Length : 0);
-
-            for (int i = 0; i < Length; i++)
-            {
-                for (int j = 0; j < this[i].Length; j++)
-                {
-                    result[i, j] = heap[i][j];
-                }
-            }
-
-            return result;
-        }
-
-        public int Length
-        {
-            get
-            {
-                return heap.Length;
-            }
-        }
-
-        public bool inHeap (T x)
-        {
-            for (int i = 0; i < Length; i++)
-            {
-                for (int j = 0; j < this[i].Length; j++)
-                {
-                    if (heap[i][j] != null && heap[i][j].Equals(x))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-        public T[] this[int col]
-        {
-            get
-            {
-                return heap[col];
-            }
-        }
-
-        public Point GetCoords(int col, int row, double x, double y, double width, double height, double rowHeight, double rowWidth)
-        {
-            var result = new Point();
-
-            int N = heap.Length;
-            int M = heap[col].Length;
-
-            double colStep = rowWidth + (width - rowWidth * N) / (N - 1);
-            double spaceBetweenRows = 2 * (height - rowHeight * M) / M;
-            double rowStep = 2 * rowHeight + spaceBetweenRows;
-
-            result.X = colStep * col;
-
-            var rowPairId = row / 2;
-
-            result.Y = spaceBetweenRows / 2 + rowStep * rowPairId + (row % 2 == 0 ? 0 : rowHeight);
-
-            result.X += x;
-            result.Y += y;
-
-            return result;
-        }
-
-        public T this[int col, int row]
-        {
-            get
-            {
-                return heap[col][row];
-            }
-            set
-            {
-                heap[col][row] = value;
-            }
-        }
-    }
-    class ParticipantGroup
-    {
-        public WeightRange weigths;
-        public YearRange years;
-        public List<Participant> participants;
-        public int RoundId { get; set; }
-        Heap<Participant> _baseDistribution;
-        public Heap<Participant> BaseDistribution
-        {
-            get
-            {
-                return _baseDistribution;
-            }
-            set
-            {
-                _baseDistribution = value;
-                Rounds = new List<Heap<Participant>>();
-            }
-        }
-
-        public void AutoDistribute()
-        {
-            if (this.RoundId != -1) return;
-            if (this.participants.Count < 2) return;
-            if (this.BaseDistribution.Length < 2)
-            {
-                if (this.BaseDistribution.Length == 1 && this.BaseDistribution[0].Length >= this.participants.Count)
-                {
-                    for (int i = 0; i < this.participants.Count; i++)
-                    {
-                        this.BaseDistribution[0][i] = this.participants[i];
-                    }
-                    this.participants.Clear();
-                }
-                return;
-            }
-                
-
-            var count1 = 2;
-            for (int i = 0; i < this.BaseDistribution[0].Length; i++)
-            {
-                if (count1 / 2 + (participants.Count - count1) == this.BaseDistribution[1].Length)
-                {
-                    break;
-                } else
-                {
-                    count1++;
-                }
-            }
-
-            var count2 = participants.Count - count1;
-
-            for (int i = 0; i < count1; i++)
-            {
-                this.BaseDistribution[0][i] = participants[0];
-                participants.RemoveAt(0);
-            }
-
-            for (int i = 0; i < count2; i++)
-            {
-                this.BaseDistribution[1][i] = participants[0];
-                participants.RemoveAt(0);
-            }
-        }
-
-        public List<Heap<Participant>> Rounds { get; set; }
-
-        int ParticipantsCount
-        {
-            get
-            {
-                int count = 0;
-                for (int i = 0; i < BaseDistribution.Length; i++)
-                {
-                    for (int j = 0; j < BaseDistribution[i].Length; j++)
-                    {
-                        if (BaseDistribution[i][j] != null) count++;
-                    }
-                }
-                return count + participants.Count;
-            }
-        }
-
-        public override string ToString()
-        {
-            return String.Format("{0} / {1}-{2} ({3})", weigths.name, years.startYear, years.endYear, ParticipantsCount);
-        }
-    }
-
-    public class MyLabel : Label
-    {
-        public int row;
-        public int col;
-    }
     public partial class GridEditor2 : Window
     {
         List<Participant> _participants;
@@ -223,74 +29,9 @@ namespace DccGridDesktop.GridEditor2
 
         bool stopReloading = false;
 
-        List<string> isBaseDistributionCorrect(ParticipantGroup group)
+        public GridEditor2()
         {
-            var bd = group.BaseDistribution;
-            //Проверка, что все распределены
-            var result = new List<string>();
-            if (group.participants.Count > 0)
-            {
-                result.Add("Остались нераспределенные игроки!");
-            }
-
-            //Проверка, что разбивка по числу правильная
-            if (group.BaseDistribution.Length > 1)
-            {
-                int count1 = 0, count2 = 0;
-                count1 = group.BaseDistribution[0].Count(x => x != null);
-                count2 = group.BaseDistribution[1].Count(x => x != null);
-
-                if (!(count1 % 2 == 0 && (count1 / 2 + count2) == group.BaseDistribution[1].Length))
-                {
-                    result.Add("Количество игроков по раундам некорректно!");
-                }
-
-                for (int i = 0; i < group.BaseDistribution[0].Length / 2; i++)
-                {
-                    if (bd[0][2 * i] == null ^ bd[0][2 * i + 1] == null)
-                    {
-                        result.Add("Некорректное распределение по парам!");
-                        break;
-                    }
-                }
-            }
-            return result;
-        }
-
-        List<string> isRoundDistributionCorrect(ParticipantGroup group)
-        {
-            var bd = group.Rounds[group.RoundId];
-            var bdr = bd[group.RoundId];
-            //Проверка, что все распределены
-            var result = new List<string>();
-
-            //Проверка, что разбивка по числу правильная
-            if (bd.Length > 1)
-            {
-                int count = 0;
-                for (int i =0; i < bd[group.RoundId].Length; i++)
-                {
-                    if (bd[group.RoundId][i] != null) count++;
-                }
-
-                if (count % 2 != 0)
-                {
-                    result.Add("Количество игроков в раунде некорректно!");
-                }
-
-                for (int i = 0; i < bd[group.RoundId].Length / 2; i++)
-                {
-                    if (bdr[2 * i] != null && bdr[2 * i + 1] != null)
-                    {
-                        if (!(bdr[2 * i].status != ParticipantStatus.Win ^ bdr[2 * i + 1].status != ParticipantStatus.Win))
-                        {
-                            result.Add("Некорректное распределение выигрышей!");
-                            break;
-                        }
-                    }
-                }
-            }
-            return result;
+            InitializeComponent();
         }
 
         public void SetInfo (List<Participant> participants, List<WeightRange> weights, List<YearRange> years)
@@ -423,12 +164,13 @@ namespace DccGridDesktop.GridEditor2
             }
             else
             {
+                btnNext.Content = "Следующий раунд >";
                 lblStatus.Content = "Раунд " + (_currentGroup.RoundId + 1);
             }
 
             if (_currentGroup.RoundId == -1)
             {
-                var errors = isBaseDistributionCorrect(_currentGroup);
+                var errors = _currentGroup.isBaseDistributionCorrect();
                 if (errors.Count > 0)
                 {
                     btnNext.IsEnabled = false;
@@ -437,7 +179,7 @@ namespace DccGridDesktop.GridEditor2
 
             if (_currentGroup.RoundId > -1)
             {
-                var errors = isRoundDistributionCorrect(_currentGroup);
+                var errors = _currentGroup.isRoundDistributionCorrect();
                 if (errors.Count > 0)
                 {
                     btnNext.IsEnabled = false;
@@ -519,11 +261,6 @@ namespace DccGridDesktop.GridEditor2
 
             if (_currentGroup.BaseDistribution[label.col, label.row] != null)            
                 DragDrop.DoDragDrop(label, String.Format("l{0};{1}", label.col, label.row), DragDropEffects.Move);
-        }
-
-        public GridEditor2()
-        {
-            InitializeComponent();
         }
 
         private void Window_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
@@ -660,6 +397,101 @@ namespace DccGridDesktop.GridEditor2
         {
             if (_currentGroup == null) return;
             LoadTree(_groupId, _currentGroup.RoundId);
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            // Create SaveFileDialog
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            // Set filter for file extension and default file extension
+            dlg.DefaultExt = ".grids";
+            dlg.Filter = "Text documents (.grids)|*.grids";
+
+            // Display OpenFileDialog by calling ShowDialog method
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox
+            if (result == true)
+            {
+                // Save document
+                var bf = new BinaryFormatter();
+                using (var file = File.Create(dlg.FileName))
+                {
+                    bf.Serialize(file, _groupedParticipants);
+                }
+            }
+        }
+
+        private void btnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            // Create OpenFileDialog
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension
+            dlg.DefaultExt = ".grids";
+            dlg.Filter = "Text documents (.grids)|*.grids";
+
+            // Display OpenFileDialog by calling ShowDialog method
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox
+            if (result == true)
+            {
+                // Open document
+                var bf = new BinaryFormatter();
+                using (var file = File.OpenRead(dlg.FileName))
+                {
+                    try
+                    {
+                        var _newGroups = (List<ParticipantGroup>)bf.Deserialize(file);
+                        _groupedParticipants = _newGroups;
+                        ReloadGui();
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Ошибка открытия файла!");
+                    }
+                }
+            }
+        }
+
+        private void btnExcel_Click(object sender, RoutedEventArgs e)
+        {
+            // Create SaveFileDialog
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            // Set filter for file extension and default file extension
+            dlg.DefaultExt = ".xlsx";
+            dlg.Filter = "Файлы Excel (.xlsx)|*.xlsx";
+
+            // Display OpenFileDialog by calling ShowDialog method
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox
+            if (result == true)
+            {
+                ExcelWriter.WriteGroupsToExcel(_groupedParticipants, dlg.FileName, false);
+            }
+        }
+
+        private void btnExcelBase_Click(object sender, RoutedEventArgs e)
+        {
+            // Create SaveFileDialog
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+
+            // Set filter for file extension and default file extension
+            dlg.DefaultExt = ".xlsx";
+            dlg.Filter = "Файлы Excel (.xlsx)|*.xlsx";
+
+            // Display OpenFileDialog by calling ShowDialog method
+            Nullable<bool> result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox
+            if (result == true)
+            {
+                ExcelWriter.WriteGroupsToExcel(_groupedParticipants, dlg.FileName, true);
+            }
         }
     }
 }

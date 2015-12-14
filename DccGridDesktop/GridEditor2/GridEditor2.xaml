@@ -30,9 +30,10 @@
         </ScrollViewer>
         <Button x:Name="btnNext" Content="Следующий раунд" Grid.Column="2" HorizontalAlignment="Left" Margin="132,8,0,0" VerticalAlignment="Top" Width="121" Height="28" Click="btnNext_Click" IsEnabled="False"/>
         <Label x:Name="lblStatus" Content="Выберите группу" Grid.Column="2" HorizontalAlignment="Left" Margin="258,9,0,0" VerticalAlignment="Top" Width="170"/>
-        <Button x:Name="btnExcel" Content="Excel..." Grid.Column="2" Margin="0,8,10,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="107" IsEnabled="False"/>
-        <Button x:Name="btnSave" Content="Сохранить..." Grid.Column="2" Margin="0,8,261,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="107" IsEnabled="False"/>
-        <Button x:Name="btnLoad" Content="Открыть..." Grid.Column="2" Margin="0,8,149,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="107" IsEnabled="False"/>
+        <Button x:Name="btnExcel" Content="Раунды" Background="LightGreen" Grid.Column="2" Margin="0,8,10,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="70" Click="btnExcel_Click"/>
+        <Button x:Name="btnSave" Content="Сохранить..." Grid.Column="2" Margin="0,8,295,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="73" Click="btnSave_Click"/>
+        <Button x:Name="btnLoad" Content="Открыть..." Grid.Column="2" Margin="0,8,223,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="67" Click="btnLoad_Click"/>
+        <Button x:Name="btnExcelBase" Content="Распределение" Grid.Column="2" Background="LightGreen" Margin="0,9,85,0" VerticalAlignment="Top" Height="30" HorizontalAlignment="Right" Width="99" Click="btnExcelBase_Click"/>
 
     </Grid>
 </Window>

@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Excel = Microsoft.Office.Interop.Excel;
+using DccGridDesktop.Models;
 
 namespace DccGridDesktop
 {
@@ -323,7 +324,7 @@ namespace DccGridDesktop
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            // Create OpenFileDialog
+            // Create SaveFileDialog
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
 
             // Set filter for file extension and default file extension
